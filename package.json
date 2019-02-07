@@ -1,0 +1,25 @@
+{
+  "name": "nodejs-redis",
+  "version": "0.0.1",
+  "description": "nodejs redis",
+  "main": "index.js",
+  "scripts": {
+    "start": "env PORT=6969 node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ikhlas-firlana/nodejs-redis.git"
+  },
+  "author": "ikhlas firlana <ifirlana@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ikhlas-firlana/nodejs-redis/issues"
+  },
+  "homepage": "https://github.com/ikhlas-firlana/nodejs-redis#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "redis": "^2.8.0"
+  }
+}
