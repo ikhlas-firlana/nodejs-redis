@@ -65,9 +65,15 @@ async function main() {
         //listen on typing
         socket.on('typing', (data) => {
             socket.broadcast.emit('typing', {username : socket.username})
-        })
-    })
+        });
+    });
+
+    client.on('message', (channel, message) => {
+        console.log("redis channel " + channel + ": " + message);
+        io.sockets.emit('new_message', {message : message, username :channel});
     
+    });
+    client.subscribe('yuhu channel');
 }
 
 main()
