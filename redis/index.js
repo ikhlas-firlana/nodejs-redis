@@ -5,7 +5,7 @@ exports.connect = async function Connect(client) {
             resolve();
         });
         client.on('error', (err) => {
-            console.err('error ', err);
+            console.error('error ', err);
             reject(err);
         })
     });
