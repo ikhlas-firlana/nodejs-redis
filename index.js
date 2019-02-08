@@ -1,15 +1,18 @@
+
+const PORT = process.env.PORT ? process.env.PORT:'6969';
+const PORT_REDIS = process.env.PORT_REDIS ? process.env.PORT_REDIS: '6379';
+const HOST_REDIS = process.env.HOST_REDIS ? process.env.HOST_REDIS: 'localhost';
 const express = require('express'),
     bodyParser = require('body-parser'),
     redis = require("redis"),
     pkg = require("./redis"),
-    client = redis.createClient('6379', 'localhost');
+    client = redis.createClient(PORT_REDIS, HOST_REDIS);
 
 async function main() { 
 
     await pkg.connect(client);
 
     const app = express();
-    const PORT = process.env.PORT ? process.env.PORT:'3000';
 
     const server = app.listen(PORT,() => console.log(`Example app listening on port ${PORT}!`));
     const io = require('socket.io')(server);

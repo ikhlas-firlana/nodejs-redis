@@ -4,7 +4,8 @@
   "description": "nodejs redis",
   "main": "index.js",
   "scripts": {
-    "start": "env PORT=6969 node index.js",
+    "start": "node index.js",
+    "dev": "env PORT=6969 PORT_REDIS=6379 HOST_REDIS=localhost node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
