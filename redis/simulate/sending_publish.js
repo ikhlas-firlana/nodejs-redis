@@ -6,5 +6,8 @@ client.on("error", function (err) {
 });
 client.on('connect', function() {
     console.log('Redis client connected');
-    client.publish('yuhu channel', 'key');
+    for (var i = 0; i < 1000; i++) { 
+        console.log('publish client i',i);
+        client.publish('yuhu channel', 'key '+i);
+    }
 });
