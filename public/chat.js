@@ -1,6 +1,8 @@
 $(function(){
     //make connection
- var socket = io.connect('http://localhost:6969');
+    // var socket = io('http://localhost:6969');
+    var socket = io('http://localhost:6969', {'transports': ['websocket']})
+    // var socket = io.connect('http://localhost:6969');
 
  //buttons and inputs
  var message = $("#message")

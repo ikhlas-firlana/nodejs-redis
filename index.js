@@ -2,98 +2,98 @@
 const PORT = process.env.PORT ? process.env.PORT:'6969';
 const PORT_REDIS = process.env.PORT_REDIS ? process.env.PORT_REDIS: '6379';
 const HOST_REDIS = process.env.HOST_REDIS ? process.env.HOST_REDIS: 'localhost';
-const express = require('express'),
-    bodyParser = require('body-parser'),
-    redis = require("redis"),
-    pkg = require("./redis"),
-    client = redis.createClient(PORT_REDIS, HOST_REDIS);
+const cluster = require('cluster'),
+    num_processes = require('os').cpus().length;
 
-async function main() { 
+const main = require('./main.js');
+const is = require('./lib/portInUse.js');
 
-    await pkg.connect(client);
+console.log('Start * ');
 
-    const app = express();
 
-    const server = app.listen(PORT,() => console.log(`app listening on port ${PORT}!`));
-    console.log(`HOST_REDIS ${HOST_REDIS}!`)
-    console.log(`PORT_REDIS ${PORT_REDIS}!`)
-    const io = require('socket.io')(server, {
-        transports: [ 'polling', 'websocket' ],
-        serveClient: false,
-        pingInterval: 10000,
-        pingTimeout: 5000,
-        cookie: false
-    });
+async function init() {
+    try {
+        if (cluster.isMaster) {
 
-    app.use(bodyParser.json());
+            let available_port = [];
 
-    //set the template engine ejs
-    app.set('view engine', 'ejs');
-    // app.set('sockerio', io);
+            for (var i = 0; i < num_processes; i++) {
+                const worker = cluster.fork();
+                const new_port = parseInt(PORT) + i;
 
-    //middlewares
-    app.use(express.static('public'))
+                available_port.push({port: new_port});
+                worker.send({ message: 'Your PORT '+new_port, port: new_port });
+                // console.log('master fork: '+i);
 
-    app.get('/', async (req, res) => {
-        try {
-            res.render('index');
-        } catch(e) {
-            console.log(e);
-            res.status(500);
-        }  
-    });
+                worker.on('disconnect', (val) => {
+                    console.log("disconnect")
+                });
+                
+            }
 
-    // index
-    app.get('/mock', async (req, res) => {
-        try {
-            const hold = await pkg.get(client, 'key');
-            console.log(typeof hold, hold);
-            res.send();
-        } catch(e) {
-            console.log(e);
-            res.status(500);
-        }  
-    });
-    // get connections
-    io.on('connection', (socket) => {
-        console.log('New user connected: + :', Object.keys(io.sockets.sockets).length);
-        // console.log(count);
+            for (const id in cluster.workers) {
+                cluster.workers[id].on('message', function(msg) {
+                    //
+                    console.log('Worker to master: ', msg);
+                    available_port = available_port.map((val) => {
+                        if (msg.port === val.port) {
+                            val.pid = msg.pid;
+                        }
+                        return val;
+                    });
 
-        //default username
-        socket.username = "Anonymous"
+                    console.log(available_port);
+                });
+            }
 
-        //listen on change_username
-        socket.on('change_username', (data) => {
-            socket.username = data.username
-        })
+            cluster.on('exit', function(deadWorker, code, signal) {
+                console.log('worker %d died (%s). restarting...',
+                deadWorker.process.pid, signal || code);
+                // Restart the worker
+                var worker = cluster.fork();
 
-        //listen on new_message
-        socket.on('new_message', (data) => {
-            //broadcast the new message
-            console.log(`> ${JSON.stringify(data)}`);
-            io.sockets.emit('new_message', {message : data.message, username : socket.username});
-        })
+                // Note the process IDs
+                var newPID = worker.process.pid;
+                var oldPID = deadWorker.process.pid;
 
-        //listen on typing
-        socket.on('typing', (data) => {
-            socket.broadcast.emit('typing', {username : socket.username})
-        });
+                // Log the event
+                console.log('worker '+oldPID+' died.');
+                console.log('worker '+newPID+' born.');
 
-        socket.on('disconnect', (reason) => { 
-            console.log('Disconnect: '+reason,": ", Object.keys(io.sockets.sockets).length);
-        });
+                // console.log('available_port ',available_port);
 
-        socket.on('error', (error) => {
-            console.error('Error: ', error);
-        });
-    });
+                // for (var id in cluster.workers) {
 
-    client.on('message', (channel, message) => {
-        console.log("redis channel " + channel + ": " + message);
-        io.sockets.emit('new_message', {message : message, username :channel});
-    
-    });
-    client.subscribe('yuhu channel');
+                //     cluster.workers[id].kill();
+
+                // }
+                var temp = available_port.filter((val) => {
+                    return val.pid === oldPID;
+                })[0];
+                console.log('old worker dead: ', temp);
+                if (temp) {
+                    worker.send({ message: 'Your Reborn in PORT '+temp.port, port: temp.port });
+                }
+            });
+        } else if (cluster.isWorker) {
+
+            console.log(`Worker ${process.pid} started and finished`);    
+
+            process.on('message', function(msg) {
+                // we only want to intercept messages that have a chat property
+                console.log('Master to worker: ', msg);
+                main.main(msg.port, {
+                    PORT: PORT,
+                    PORT_REDIS: PORT_REDIS,
+                    HOST_REDIS: HOST_REDIS
+                })
+
+                process.send({ pid: process.pid, port: msg.port });
+            });
+        }
+    } catch (e) {
+        console.log("SCRIPT ERRROR", e);
+    }
 }
 
-main()
+init();

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "env PORT=6969 PORT_REDIS=6379 HOST_REDIS=localhost node index.js",
+    "dev": "env PORT=6968 PORT_REDIS=6379 HOST_REDIS=localhost node index.js",
+    "cluster": "node index-cluster.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,7 +23,11 @@
     "body-parser": "^1.18.3",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
+    "farmhash": "^2.1.0",
+    "random-ipv6": "^1.0.2",
     "redis": "^2.8.0",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
+    "socket.io-redis": "^5.2.0"
   }
 }

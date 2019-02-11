@@ -1,0 +1,13 @@
+config:
+  register:
+    room: # room defined
+      name: "serv"
+      config:
+        - Authorization: "OTHER_SERVICE"
+      channel: "message"
+  listener:
+    redis:
+      on:
+        message:
+          publish: 
+            serv: "message"
