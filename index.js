@@ -1,12 +1,11 @@
 
-const PORT = process.env.PORT ? process.env.PORT:'6969';
+const PORT = process.env.PORT ? process.env.PORT:'6968';
 const PORT_REDIS = process.env.PORT_REDIS ? process.env.PORT_REDIS: '6379';
 const HOST_REDIS = process.env.HOST_REDIS ? process.env.HOST_REDIS: 'localhost';
 const cluster = require('cluster'),
     num_processes = require('os').cpus().length;
 
 const main = require('./main.js');
-const is = require('./lib/portInUse.js');
 
 console.log('Start * ');
 
@@ -19,7 +18,8 @@ async function init() {
 
             for (var i = 0; i < num_processes; i++) {
                 const worker = cluster.fork();
-                const new_port = parseInt(PORT) + i;
+                // const new_port = parseInt(PORT) + i;
+                const new_port = parseInt(PORT);
 
                 available_port.push({port: new_port});
                 worker.send({ message: 'Your PORT '+new_port, port: new_port });

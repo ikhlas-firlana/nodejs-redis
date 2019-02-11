@@ -15,7 +15,7 @@ client.on('connect', function() {
     // }
     interval_i = 1;
     var interval = setInterval(function(){ 
-        for (var i = 0; i <= 1000; i++) { 
+        for (var i = 0; i <= 10000; i++) { 
             console.log('publish client i',i);
             client.publish('yuhu channel', 'key '+i);
         }

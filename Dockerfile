@@ -9,6 +9,7 @@ RUN apk --no-cache add \
     curl \
     openssh \
     bash \
+    nginx \
     make 
 RUN apk --no-cache add nodejs-lts --update 
 WORKDIR /

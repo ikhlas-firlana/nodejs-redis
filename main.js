@@ -2,7 +2,9 @@ const socketio = require('socket.io');
 const express = require('express');
 const pkg = require("./redis");
 const bodyParser = require('body-parser'),
-    redis = require("redis");
+    redis = require("redis"),
+    http = require('http');
+
     
 
 async function main(PORT, env) { 
@@ -13,7 +15,9 @@ async function main(PORT, env) {
     
         const app = express();
     
-        const server = app.listen(PORT,() => console.log(`app listening on port ${PORT}!`));
+        const server = http.createServer(app);
+        server.listen(PORT);
+        // const server = app.listen(PORT,() => console.log(`app listening on port ${PORT}!`));
         // console.log(`HOST_REDIS ${env.HOST_REDIS}!`)
         // console.log(`PORT_REDIS ${env.PORT_REDIS}!`)
         const io = socketio(server, {
